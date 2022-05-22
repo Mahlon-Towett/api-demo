@@ -82,7 +82,7 @@ public class StudentController {
             responseObj.setStatusMessage("Student saved succesfully!!!");
             return new ResponseEntity(responseObj, HttpStatus.OK);
         } catch(Exception e) {
-            LOG.info("Error ocured!!!!......: ");
+            LOG.info("Error ocured!!......: ");
             e.printStackTrace(System.out);
             responseObj.setStatusCode("-1");
             responseObj.setStatusMessage("Could not process request, please try again later......");
