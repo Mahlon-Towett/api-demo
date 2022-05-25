@@ -13,6 +13,9 @@ public class EmailSearchRequestObject {
 
     public EmailSearchRequestObject() {
     }
+    
+   
+    
 
     public String getEmail() {
         return email;

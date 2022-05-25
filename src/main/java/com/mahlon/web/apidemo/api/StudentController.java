@@ -4,11 +4,16 @@
  */
 package com.mahlon.web.apidemo.api;
 
+
 import com.mahlon.web.apidemo.model.Student;
 import com.mahlon.web.apidemo.model.dto.EmailSearchRequestObject;
+
 import com.mahlon.web.apidemo.model.dto.ResponseObject;
 import com.mahlon.web.apidemo.model.dto.StudentDTO;
+
 import com.mahlon.web.apidemo.model.repository.StudentRepository;
+
+import com.mahlon.web.apidemo.model.service.MpesaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,6 +46,10 @@ public class StudentController {
     
     @Autowired
     StudentRepository studentRepository;
+    
+    @Autowired
+    MpesaService mpesaService;
+    
     
     private static final Logger LOG = Logger.getLogger(StudentController.class.getName());
     
@@ -116,4 +125,22 @@ public class StudentController {
     
 
     }
+    
+    @PostMapping("mpesa/stkpush")
+    public ResponseEntity<?> mpesaTest() {
+        ResponseObject responseObj = new ResponseObject();
+        try{
+            return new ResponseEntity(mpesaService.send(), HttpStatus.OK);
+        } catch(Exception e) {
+            LOG.info("Error ocured!!!!......: ");
+            e.printStackTrace(System.out);
+            responseObj.setStatusCode("-1");
+            responseObj.setStatusMessage("Could not process request, please try again later......");
+            return new ResponseEntity(responseObj, HttpStatus.INTERNAL_SERVER_ERROR);
+    
     }
+        
+     }   
+       }
+
+
