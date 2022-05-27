@@ -39,8 +39,8 @@ public class MpesaService {
         try {
             Gson g = new Gson();
           
-            String consumerKey =  "insert consumer key";
-            String consumerSecret ="insert consumer secret";
+            String consumerKey =  "insert consumerKey";
+            String consumerSecret ="insert consumerSecret";
             
             String tokenEndpint = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
             RestTemplate restTemplate = new RestTemplate();
