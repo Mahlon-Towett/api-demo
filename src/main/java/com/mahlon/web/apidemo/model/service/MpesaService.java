@@ -5,8 +5,15 @@
 package com.mahlon.web.apidemo.model.service;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -15,6 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -28,16 +36,44 @@ public class MpesaService {
    
     
     public String getToken() {
-         String consumerKey = "15b7uQQRwtQM37Hn53wsjkvsU8Y0dSwa";
-        String consumerSecret = "09eTLRvjwCJUkdoA";
-        String tokenEndpint = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
-        RestTemplate restTemplate = new RestTemplate();
-        
-        
-        //@TODO: Put logic here to generate token from Safaricom token endpoint
-        
-        
-      
+        try {
+            Gson g = new Gson();
+          
+            String consumerKey =  "insert consumer key";
+            String consumerSecret ="insert consumer secret";
+            
+            String tokenEndpint = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
+            RestTemplate restTemplate = new RestTemplate();
+
+            HttpHeaders headers = new HttpHeaders();
+            String auth = consumerKey + ":" + consumerSecret;
+            byte[] encodedAuth = Base64.encodeBase64(
+            auth.getBytes(StandardCharsets.ISO_8859_1));
+            String authHeader = "Basic " + new String(encodedAuth);
+            headers.set("Authorization", authHeader);
+            HttpEntity<?> entity = new HttpEntity<>(headers);
+            log.info("Sending get token post request, URL: " + tokenEndpint);
+            ResponseEntity<String> response = restTemplate.exchange(tokenEndpint, HttpMethod.GET, entity, String.class);
+            if(response != null) {
+                log.info("Response is not null");
+                String responseStr = response.getBody();
+                if(responseStr != null) {
+                    log.info("Response string is not null");
+                    System.out.println("START RESPONSE: \n");
+                    System.out.println(responseStr);
+                    System.out.println("END RESPONSE: \n");
+                    TokenResponse responseObj = g.fromJson(responseStr, TokenResponse.class);
+                    if(responseObj != null) {
+                        String token = responseObj.getAccess_token();
+                        if(token != null) {
+                            return token;
+                        } else log.info("Token is null");
+                    } else log.info("Token responseObj is null");
+                } else log.info("Token Response string is null");
+            } else log.info("Token Response is null");
+        } catch(JsonSyntaxException | RestClientException e) {
+            log.severe("Error occrred on get token");
+        }
         return null;
     }
    
@@ -46,7 +82,10 @@ public class MpesaService {
         RestTemplate restTemplate = new RestTemplate();
         
         String stkPushEndpoint = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest";
-    String token = "uRdzmpESICNsoEltxlqUcpdkqQsD";
+        String token = getToken();
+       // String token = "uRdzmpESICNsoEltxlqUcpdkqQsD";
+        if(token == null) return null;
+       
       
         String data = "{\n" +
 "    \"BusinessShortCode\": 174379,\n" +
@@ -96,7 +135,43 @@ public class MpesaService {
         }
         return null;
     }
+    
+     private class TokenResponse {
+        
+        @JsonProperty("access_token")
+        private String access_token;
+        @JsonProperty("expires_in")
+        private String expires_in;
+
+        public TokenResponse() {
+        }
+
+        public String getAccess_token() {
+            return access_token;
+        }
+
+        public void setAccess_token(String access_token) {
+            this.access_token = access_token;
+        }
+
+        public String getExpires_in() {
+            return expires_in;
+        }
+
+        public void setExpires_in(String expires_in) {
+            this.expires_in = expires_in;
+        }
+
+        
+        
+        
+        
+    }
+        
+        
+    
+    }
 
    
-}
-//CompanyXLTD
+
+
